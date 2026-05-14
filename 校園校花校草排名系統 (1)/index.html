@@ -1,0 +1,574 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>校園校花校草排名 - 純 HTML 版</title>
+    <!-- Tailwind CSS Play CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        .glass { background: rgba(255, 255, 255, 0.8); backdrop-filter: blur(12px); }
+        .line-clamp-2 {
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;  
+            overflow: hidden;
+        }
+    </style>
+</head>
+<body class="bg-[#F8FAFC] text-slate-900 min-h-screen">
+
+    <!-- Header -->
+    <header class="sticky top-0 z-40 bg-white/80 backdrop-blur-md border-b border-slate-200">
+        <div class="max-w-7xl mx-auto px-4 h-16 flex items-center justify-between">
+            <div class="flex items-center gap-2">
+                <div class="bg-sky-500 p-2 rounded-xl text-white">
+                    <i data-lucide="trophy" class="w-6 h-6"></i>
+                </div>
+                <h1 class="text-xl font-bold bg-gradient-to-r from-sky-600 to-indigo-600 bg-clip-text text-transparent hidden sm:block">
+                    校園校花校草排名
+                </h1>
+            </div>
+
+            <div class="flex items-center gap-4">
+                <div id="admin-toggle-container" class="flex items-center gap-2 bg-slate-100 p-1 rounded-xl border border-slate-200">
+                    <button onclick="toggleAdminMode(false)" id="btn-user-mode" class="px-3 py-1.5 rounded-lg text-xs font-bold transition-all bg-white shadow-sm">一般模式</button>
+                    <button onclick="toggleAdminMode(true)" id="btn-admin-mode" class="px-3 py-1.5 rounded-lg text-xs font-bold transition-all text-slate-500 hover:bg-slate-50">導師模式</button>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <main class="max-w-7xl mx-auto px-4 py-8">
+        <!-- Welcome Section -->
+        <section class="mb-12 text-center">
+            <h2 class="text-4xl sm:text-5xl font-black text-slate-900 mb-4 tracking-tight">
+                誰是你心目中的 <span class="text-rose-500">校花</span> 與 <span class="text-sky-500">校草</span>？
+            </h2>
+            <p class="text-slate-500 max-w-2xl mx-auto text-lg">
+                參與年度校園評選，為你支持的同學投下神聖的一票。
+            </p>
+        </section>
+
+        <!-- Filters & Actions -->
+        <div class="flex flex-col gap-6 mb-8">
+            <div class="flex flex-col lg:flex-row gap-6 items-start lg:items-center justify-between">
+                <div id="grade-filters" class="flex flex-wrap gap-2 bg-white p-1.5 rounded-2xl shadow-sm border border-slate-200">
+                    <!-- Grade buttons will be injected -->
+                </div>
+
+                <div class="flex items-center gap-4 w-full lg:w-auto">
+                    <div id="gender-filters" class="flex bg-white p-1 rounded-xl shadow-sm border border-slate-200 flex-1 lg:flex-none">
+                        <!-- Gender buttons will be injected -->
+                    </div>
+
+                    <button onclick="openNominateModal()" class="flex items-center gap-2 px-6 py-3 bg-slate-900 text-white rounded-xl font-bold hover:bg-slate-800 transition-all shadow-xl shadow-slate-200">
+                        <i data-lucide="plus-circle" class="w-5 h-5"></i>
+                        我要提名
+                    </button>
+                </div>
+            </div>
+
+            <!-- Tag Filter -->
+            <div class="flex flex-wrap gap-2 items-center">
+                <span class="text-sm font-bold text-slate-400 mr-2 flex items-center gap-1">
+                    <i data-lucide="filter" class="w-4 h-4"></i> 標籤篩選:
+                </span>
+                <div id="tag-filters" class="flex flex-wrap gap-2">
+                    <!-- Tag buttons will be injected -->
+                </div>
+            </div>
+        </div>
+
+        <!-- Status Filters & Stats -->
+        <div class="flex flex-col md:flex-row gap-6 mb-8 items-start md:items-center justify-between bg-white p-4 rounded-3xl shadow-sm border border-slate-100">
+            <div id="status-filters" class="flex flex-wrap gap-2">
+                <!-- Status filter buttons will be injected -->
+            </div>
+
+            <div class="flex items-center gap-6 text-sm">
+                <div class="flex flex-col md:flex-row gap-2 md:gap-4">
+                    <div class="flex items-center gap-1.5">
+                        <span class="w-2 h-2 rounded-full bg-green-500"></span>
+                        <span class="text-slate-500 font-medium">參選中:</span>
+                        <span id="stat-active" class="font-bold text-slate-900">0</span>
+                    </div>
+                    <div class="flex items-center gap-1.5">
+                        <span class="w-2 h-2 rounded-full bg-red-500"></span>
+                        <span class="text-slate-500 font-medium">已淘汰:</span>
+                        <span id="stat-done" class="font-bold text-slate-900">0</span>
+                    </div>
+                    <div class="flex items-center gap-1.5">
+                        <span class="w-2 h-2 rounded-full bg-sky-500"></span>
+                        <span class="text-slate-500 font-medium">總人數:</span>
+                        <span id="stat-total" class="font-bold text-slate-900">0</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Leaderboard -->
+        <div id="candidate-list" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <!-- Candidates will be injected here -->
+        </div>
+    </main>
+
+    <!-- Nomination Modal -->
+    <div id="nominate-modal" class="fixed inset-0 z-50 flex items-center justify-center p-4 hidden">
+        <div onclick="closeNominateModal()" class="absolute inset-0 bg-slate-900/60 backdrop-blur-sm"></div>
+        <div class="relative bg-white rounded-3xl shadow-2xl w-full max-w-lg overflow-hidden animate-in fade-in zoom-in duration-300">
+            <div class="p-6 border-b border-slate-100 flex items-center justify-between">
+                <h3 class="text-2xl font-black text-slate-900">提名候選人</h3>
+                <button onclick="closeNominateModal()" class="text-slate-400 hover:text-slate-600">
+                    <i data-lucide="plus-circle" class="w-6 h-6 rotate-45"></i>
+                </button>
+            </div>
+            
+            <form id="nominate-form" class="p-6 space-y-6">
+                <div class="space-y-2">
+                    <label class="text-sm font-bold text-slate-700">姓名</label>
+                    <input name="name" required placeholder="輸入候選人姓名" class="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-sky-500 focus:border-transparent outline-none transition-all">
+                </div>
+
+                <div class="grid grid-cols-2 gap-4">
+                    <div class="space-y-2">
+                        <label class="text-sm font-bold text-slate-700">年級</label>
+                        <select name="grade" id="form-grade" class="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-sky-500 outline-none">
+                            <!-- Options will be injected -->
+                        </select>
+                    </div>
+                    <div class="space-y-2">
+                        <label class="text-sm font-bold text-slate-700">類別</label>
+                        <select name="gender" id="form-gender" class="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-sky-500 outline-none">
+                            <option value="校花">校花</option>
+                            <option value="校草">校草</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="space-y-2">
+                    <label class="text-sm font-bold text-slate-700">提名宣言 (可選)</label>
+                    <textarea name="declaration" rows="3" placeholder="寫下你的提名理由或口號..." class="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-sky-500 outline-none resize-none"></textarea>
+                </div>
+
+                <div class="space-y-2">
+                    <label class="text-sm font-bold text-slate-700">特色標籤 (最多 5 個)</label>
+                    <div id="form-tags" class="flex flex-wrap gap-2">
+                        <!-- Checkboxes will be injected -->
+                    </div>
+                </div>
+
+                <div class="space-y-2">
+                    <label class="text-sm font-bold text-slate-700">照片 URL (可選)</label>
+                    <div class="relative">
+                        <input name="photoUrl" placeholder="https://..." class="w-full pl-11 pr-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-sky-500 outline-none">
+                        <i data-lucide="camera" class="w-5 h-5 text-slate-400 absolute left-4 top-1/2 -translate-y-1/2"></i>
+                    </div>
+                    <p class="text-xs text-slate-400">留空將自動生成隨機頭像</p>
+                </div>
+
+                <button type="submit" class="w-full py-4 bg-sky-500 text-white rounded-2xl font-black text-lg hover:bg-sky-600 transition-all shadow-xl shadow-sky-100">
+                    提交提名
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="py-12 border-t border-slate-200 mt-20">
+        <div class="max-w-7xl mx-auto px-4 text-center">
+            <div class="flex items-center justify-center gap-2 mb-4">
+                <i data-lucide="school" class="w-6 h-6 text-slate-400"></i>
+                <span class="text-slate-400 font-bold tracking-widest uppercase text-sm">Campus Ranking System</span>
+            </div>
+            <p class="text-slate-400 text-sm">© 2026 校園校花校草評選委員會. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <script>
+        // --- Constants ---
+        const GRADES = ["初一", "初二", "初三", "高一", "高二", "高三"];
+        const GENDERS = ["校花", "校草"];
+        const PREDEFINED_TAGS = ["運動健將", "學霸", "文藝青年", "陽光開朗", "社牛", "才藝出眾"];
+        const LS_KEY = "records";
+        const LS_VOTES_KEY = "user_votes";
+
+        // --- State ---
+        let state = {
+            activeGrade: GRADES[0],
+            activeGender: GENDERS[0],
+            activeTag: null,
+            statusFilter: 'all',
+            isAdmin: false,
+            records: [],
+            userVotes: {} // key format: grade_gender -> candidateId
+        };
+
+        // --- Core Functions (As per requirement 6) ---
+
+        /**
+         * 5. localStorage key 固定叫 "records"，用 JSON.stringify
+         * 4. 每條記錄必須有以下欄位：
+         *    - id  (Date.now() + "_" + Math.random().toString(36).slice(2,6))
+         *    - createdAt  (new Date().toISOString())
+         *    - status (預設 "active")
+         */
+        function saveData(newRecord) {
+            const records = loadData();
+            records.push(newRecord);
+            localStorage.setItem(LS_KEY, JSON.stringify(records));
+            state.records = records;
+            renderList();
+        }
+
+        function loadData() {
+            const data = localStorage.getItem(LS_KEY);
+            return data ? JSON.parse(data) : [];
+        }
+
+        function renderList() {
+            const container = document.getElementById('candidate-list');
+            const records = state.records;
+
+            // 1. Filter by Primary Category (Grade & Gender)
+            let filtered = records.filter(r => r.grade === state.activeGrade && r.gender === state.activeGender);
+
+            // 2. Filter by Tag if any
+            if (state.activeTag) {
+                filtered = filtered.filter(r => r.tags && r.tags.includes(state.activeTag));
+            }
+
+            // Stats (before status filter)
+            const activeCount = filtered.filter(r => (r.status || 'active') === 'active').length;
+            const doneCount = filtered.filter(r => r.status === 'done').length;
+            const totalCount = filtered.length;
+
+            document.getElementById('stat-active').innerText = activeCount;
+            document.getElementById('stat-done').innerText = doneCount;
+            document.getElementById('stat-total').innerText = totalCount;
+
+            // 3. Filter by Status
+            if (state.statusFilter !== 'all') {
+                filtered = filtered.filter(r => (r.status || 'active') === state.statusFilter);
+            }
+
+            // 4. Sort: active first, then votes desc
+            filtered.sort((a, b) => {
+                const sA = a.status || 'active';
+                const sB = b.status || 'active';
+                if (sA !== sB) return sA === 'active' ? -1 : 1;
+                return (b.votes || 0) - (a.votes || 0);
+            });
+
+            if (filtered.length === 0) {
+                container.innerHTML = `
+                    <div class="col-span-full py-20 text-center">
+                        <div class="bg-white rounded-3xl p-12 shadow-sm border border-slate-100 inline-block">
+                            <i data-lucide="user-circle" class="w-16 h-16 text-slate-200 mx-auto mb-4"></i>
+                            <h3 class="text-xl font-bold text-slate-900 mb-2">暫無候選人</h3>
+                            <p class="text-slate-500 mb-6 font-medium">篩選條件下沒有找到候選人，換個條件或提名一位吧！</p>
+                        </div>
+                    </div>
+                `;
+                lucide.createIcons();
+                return;
+            }
+
+            container.innerHTML = filtered.map((candidate, index) => {
+                const isDone = candidate.status === 'done';
+                const voteKey = `${candidate.grade}_${candidate.gender}`;
+                const hasVotedInCategory = state.userVotes[voteKey];
+                const isVotedForThis = hasVotedInCategory === candidate.id;
+
+                let cardClass = "group relative bg-white rounded-3xl p-5 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all border border-slate-100";
+                if (isDone) cardClass += " grayscale opacity-60";
+
+                let rankClass = "absolute -top-3 -left-3 w-10 h-10 rounded-full flex items-center justify-center font-black text-lg z-10 shadow-lg";
+                if (isDone) rankClass += " bg-slate-400 text-white";
+                else if (index === 0) rankClass += " bg-yellow-400 text-white scale-110";
+                else if (index === 1) rankClass += " bg-slate-300 text-white";
+                else if (index === 2) rankClass += " bg-amber-600 text-white";
+                else rankClass += " bg-slate-100 text-slate-400";
+
+                return `
+                <div class="${cardClass}" data-id="${candidate.id}">
+                    <!-- Rank Badge -->
+                    <div class="${rankClass}">${index + 1}</div>
+
+                    <div class="relative aspect-square mb-4 overflow-hidden rounded-2xl bg-slate-50">
+                        <img 
+                            src="${candidate.photoUrl || 'https://picsum.photos/seed/'+candidate.id+'/400/400'}" 
+                            alt="${candidate.name}"
+                            class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                        />
+                        
+                        <!-- Recommendation Badge -->
+                        ${candidate.isRecommended && !isDone ? `
+                            <div class="absolute top-3 left-3 bg-yellow-400 text-white px-2 py-1 rounded-lg flex items-center gap-1 shadow-lg z-10 animate-pulse">
+                                <i data-lucide="award" class="w-4 h-4"></i>
+                                <span class="text-[10px] font-black uppercase tracking-wider">導師推薦</span>
+                            </div>
+                        ` : ''}
+
+                        <!-- Admin Actions -->
+                        ${state.isAdmin ? `
+                            <div class="absolute top-3 right-3 flex flex-col gap-2 z-20">
+                                <button onclick="handleToggleRecommend('${candidate.id}')" 
+                                    class="p-2 rounded-lg transition-all ${candidate.isRecommended ? 'bg-yellow-500 text-white' : 'bg-white/80 text-slate-400 hover:bg-white'}"
+                                    title="${candidate.isRecommended ? '取消推薦' : '推薦此候選人'}">
+                                    <i data-lucide="award" class="w-5 h-5"></i>
+                                </button>
+                                <button onclick="handleToggleStatus('${candidate.id}')"
+                                    class="p-2 rounded-lg transition-all ${isDone ? 'bg-green-500 text-white' : 'bg-red-500 text-white'}"
+                                    title="${isDone ? '恢復候選人' : '標記為淘汰'}">
+                                    <i data-lucide="${isDone ? 'rotate-ccw' : 'ban'}" class="w-5 h-5"></i>
+                                </button>
+                            </div>
+                        ` : ''}
+
+                        <div class="absolute bottom-3 right-3 bg-white/90 backdrop-blur px-3 py-1 rounded-full flex items-center gap-1.5 shadow-sm">
+                            <i data-lucide="vote" class="w-4 h-4 text-sky-500"></i>
+                            <span class="text-sm font-bold text-slate-700">${candidate.votes || 0} 票</span>
+                        </div>
+                    </div>
+
+                    <div class="mb-4">
+                        <div class="flex items-center gap-2 mb-1">
+                            <h3 class="text-xl font-bold text-slate-900">${candidate.name}</h3>
+                            ${isDone ? `<span class="px-2 py-0.5 bg-red-100 text-red-600 text-[10px] font-black rounded-lg uppercase tracking-wider">已淘汰</span>` : ''}
+                        </div>
+                        
+                        <div class="flex flex-wrap gap-1 mb-3">
+                            ${(candidate.tags || []).map(tag => `<span class="px-2 py-0.5 bg-slate-100 text-slate-500 rounded text-[10px] font-bold">#${tag}</span>`).join('')}
+                        </div>
+
+                        <p class="text-sm text-slate-500 line-clamp-2 italic">
+                            "${candidate.declaration || "這傢伙很懶，什麼都沒留下。"}"
+                        </p>
+                    </div>
+
+                    <button 
+                        onclick="handleVote('${candidate.id}')"
+                        ${hasVotedInCategory ? 'disabled' : ''}
+                        class="w-full py-3 rounded-xl font-bold transition-all flex items-center justify-center gap-2 ${
+                            isVotedForThis ? 'bg-green-500 text-white' : 
+                            hasVotedInCategory ? 'bg-slate-100 text-slate-400 cursor-not-allowed' :
+                            state.activeGender === '校花' ? 'bg-rose-50 text-rose-600 hover:bg-rose-500 hover:text-white' : 'bg-sky-50 text-sky-600 hover:bg-sky-500 hover:text-white'
+                        }"
+                    >
+                        ${isVotedForThis ? '已投票' : hasVotedInCategory ? '已投過票' : '<i data-lucide="vote" class="w-5 h-5"></i><span>投他一票</span>'}
+                    </button>
+                </div>
+                `;
+            }).join('');
+
+            lucide.createIcons();
+        }
+
+        // --- Helper Functions ---
+
+        function updateFilterUI() {
+            // Grade buttons
+            const gradeContainer = document.getElementById('grade-filters');
+            gradeContainer.innerHTML = GRADES.map(g => `
+                <button onclick="setActiveGrade('${g}')" class="px-4 py-2 rounded-xl text-sm font-semibold transition-all ${state.activeGrade === g ? 'bg-sky-500 text-white shadow-md shadow-sky-100' : 'text-slate-500 hover:bg-slate-50'}">
+                    ${g}
+                </button>
+            `).join('');
+
+            // Gender buttons
+            const genderContainer = document.getElementById('gender-filters');
+            genderContainer.innerHTML = GENDERS.map(g => `
+                <button onclick="setActiveGender('${g}')" class="flex-1 lg:flex-none px-6 py-2 rounded-lg text-sm font-bold transition-all flex items-center justify-center gap-2 ${state.activeGender === g ? (g === '校花' ? 'bg-rose-500 text-white shadow-md shadow-rose-100' : 'bg-sky-500 text-white shadow-md shadow-sky-100') : 'text-slate-500 hover:bg-slate-50'}">
+                    <i data-lucide="${g === '校花' ? 'heart' : 'award'}" class="w-4 h-4"></i>
+                    ${g}
+                </button>
+            `).join('');
+
+            // Tag filters
+            const tagContainer = document.getElementById('tag-filters');
+            tagContainer.innerHTML = `
+                <button onclick="setActiveTag(null)" class="px-3 py-1 rounded-full text-xs font-bold transition-all border ${state.activeTag === null ? 'bg-slate-900 text-white border-slate-900' : 'bg-white text-slate-500 border-slate-200 hover:border-slate-300'}">全部</button>
+                ${PREDEFINED_TAGS.map(t => `
+                    <button onclick="setActiveTag('${t}')" class="px-3 py-1 rounded-full text-xs font-bold transition-all border ${state.activeTag === t ? 'bg-sky-500 text-white border-sky-500' : 'bg-white text-slate-500 border-slate-200 hover:border-slate-300'}">
+                        ${t}
+                    </button>
+                `).join('')}
+            `;
+
+            // Status filters
+            const statusContainer = document.getElementById('status-filters');
+            const statusOptions = [
+                { id: 'all', label: '全部候選人' },
+                { id: 'active', label: '只看參選中 (active)' },
+                { id: 'done', label: '只看已淘汰 (done)' }
+            ];
+            statusContainer.innerHTML = statusOptions.map(opt => `
+                <button onclick="setStatusFilter('${opt.id}')" class="px-4 py-2 rounded-xl text-sm font-bold transition-all border ${state.statusFilter === opt.id ? 'bg-slate-900 text-white border-slate-900 shadow-lg shadow-slate-200' : 'bg-white text-slate-500 border-slate-200 hover:border-slate-300'}">
+                    ${opt.label}
+                </button>
+            `).join('');
+
+            lucide.createIcons();
+        }
+
+        // --- Event Handlers ---
+
+        function setActiveGrade(g) {
+            state.activeGrade = g;
+            updateFilterUI();
+            renderList();
+        }
+
+        function setActiveGender(g) {
+            state.activeGender = g;
+            updateFilterUI();
+            renderList();
+        }
+
+        function setActiveTag(t) {
+            state.activeTag = (state.activeTag === t) ? null : t;
+            updateFilterUI();
+            renderList();
+        }
+
+        function setStatusFilter(s) {
+            state.statusFilter = s;
+            updateFilterUI();
+            renderList();
+        }
+
+        function toggleAdminMode(isAdmin) {
+            state.isAdmin = isAdmin;
+            const btnUser = document.getElementById('btn-user-mode');
+            const btnAdmin = document.getElementById('btn-admin-mode');
+            
+            if (isAdmin) {
+                btnAdmin.classList.add('bg-white', 'shadow-sm');
+                btnAdmin.classList.remove('text-slate-500', 'hover:bg-slate-50');
+                btnUser.classList.remove('bg-white', 'shadow-sm');
+                btnUser.classList.add('text-slate-500', 'hover:bg-slate-50');
+            } else {
+                btnUser.classList.add('bg-white', 'shadow-sm');
+                btnUser.classList.remove('text-slate-500', 'hover:bg-slate-50');
+                btnAdmin.classList.remove('bg-white', 'shadow-sm');
+                btnAdmin.classList.add('text-slate-500', 'hover:bg-slate-50');
+            }
+            renderList();
+        }
+
+        function handleVote(candidateId) {
+            const records = state.records;
+            const candidate = records.find(r => r.id === candidateId);
+            if (!candidate) return;
+
+            const voteKey = `${candidate.grade}_${candidate.gender}`;
+            if (state.userVotes[voteKey]) {
+                alert("你已經在這個類別投過票了！");
+                return;
+            }
+
+            // Update candidate
+            candidate.votes = (candidate.votes || 0) + 1;
+            
+            // Save candidate records
+            localStorage.setItem(LS_KEY, JSON.stringify(records));
+            
+            // Track vote
+            state.userVotes[voteKey] = candidateId;
+            localStorage.setItem(LS_VOTES_KEY, JSON.stringify(state.userVotes));
+            
+            renderList();
+        }
+
+        function handleToggleRecommend(id) {
+            const records = state.records;
+            const candidate = records.find(r => r.id === id);
+            if (candidate) {
+                candidate.isRecommended = !candidate.isRecommended;
+                localStorage.setItem(LS_KEY, JSON.stringify(records));
+                renderList();
+            }
+        }
+
+        function handleToggleStatus(id) {
+            const records = state.records;
+            const candidate = records.find(r => r.id === id);
+            if (candidate) {
+                candidate.status = (candidate.status === 'done') ? 'active' : 'done';
+                localStorage.setItem(LS_KEY, JSON.stringify(records));
+                renderList();
+            }
+        }
+
+        function openNominateModal() {
+            document.getElementById('nominate-modal').classList.remove('hidden');
+            // Sync form defaults with active filters
+            document.getElementById('form-grade').value = state.activeGrade;
+            document.getElementById('form-gender').value = state.activeGender;
+        }
+
+        function closeNominateModal() {
+            document.getElementById('nominate-modal').classList.add('hidden');
+            document.getElementById('nominate-form').reset();
+        }
+
+        // --- Initialization ---
+
+        function init() {
+            // Load and render
+            state.records = loadData();
+            state.userVotes = JSON.parse(localStorage.getItem(LS_VOTES_KEY) || '{}');
+
+            // Setup Grade options
+            const gradeSelect = document.getElementById('form-grade');
+            gradeSelect.innerHTML = GRADES.map(g => `<option value="${g}">${g}</option>`).join('');
+
+            // Setup Tag checkboxes
+            const tagsContainer = document.getElementById('form-tags');
+            tagsContainer.innerHTML = PREDEFINED_TAGS.map(t => `
+                <label class="flex items-center gap-1 bg-slate-50 px-3 py-1.5 rounded-lg cursor-pointer hover:bg-slate-100 transition-colors">
+                    <input type="checkbox" name="tags" value="${t}" class="w-4 h-4 rounded border-slate-300 text-sky-500 focus:ring-sky-500">
+                    <span class="text-xs font-medium text-slate-600">${t}</span>
+                </label>
+            `).join('');
+
+            // Form Submit handler
+            document.getElementById('nominate-form').onsubmit = function(e) {
+                e.preventDefault();
+                const formData = new FormData(this);
+                
+                const selectedTags = [];
+                formData.getAll('tags').forEach(t => selectedTags.push(t));
+
+                const newRecord = {
+                    id: Date.now() + "_" + Math.random().toString(36).slice(2,6),
+                    createdAt: new Date().toISOString(),
+                    status: "active",
+                    name: formData.get('name'),
+                    grade: formData.get('grade'),
+                    gender: formData.get('gender'),
+                    declaration: formData.get('declaration'),
+                    photoUrl: formData.get('photoUrl'),
+                    tags: selectedTags,
+                    isRecommended: false,
+                    votes: 0
+                };
+
+                saveData(newRecord);
+                closeNominateModal();
+            };
+
+            updateFilterUI();
+            renderList();
+        }
+
+        // Run Init
+        document.addEventListener('DOMContentLoaded', init);
+    </script>
+</body>
+</html>
