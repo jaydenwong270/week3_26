@@ -191,6 +191,7 @@
 
     <script>
         // --- Constants ---
+        const APPS_SCRIPT_URL = "PASTE_YOUR_APPS_SCRIPT_URL_HERE"; // 部署後請替換為真實 URL
         const GRADES = ["初一", "初二", "初三", "高一", "高二", "高三"];
         const GENDERS = ["校花", "校草"];
         const PREDEFINED_TAGS = ["運動健將", "學霸", "文藝青年", "陽光開朗", "社牛", "才藝出眾"];
@@ -208,20 +209,34 @@
             userVotes: {} // key format: grade_gender -> candidateId
         };
 
-        // --- Core Functions (As per requirement 6) ---
+        // --- Sync Helper ---
+        function syncToSheet(payload) {
+            if (APPS_SCRIPT_URL === "PASTE_YOUR_APPS_SCRIPT_URL_HERE" || !APPS_SCRIPT_URL) {
+                console.warn("Apps Script URL 尚未設定，資料不會同步到 Google Sheet。");
+                return;
+            }
+            fetch(APPS_SCRIPT_URL, {
+                method: 'POST',
+                headers: { "Content-Type": "text/plain" },
+                body: JSON.stringify(payload)
+            })
+            .then(res => res.json())
+            .then(data => console.log("Sync success:", data))
+            .catch(err => console.warn("Sync failed:", err));
+        }
+
+        // --- Core Functions ---
 
         /**
-         * 5. localStorage key 固定叫 "records"，用 JSON.stringify
-         * 4. 每條記錄必須有以下欄位：
-         *    - id  (Date.now() + "_" + Math.random().toString(36).slice(2,6))
-         *    - createdAt  (new Date().toISOString())
-         *    - status (預設 "active")
+         * 新增一筆記錄（原 saveData 增加 Sheet 同步）
          */
         function saveData(newRecord) {
             const records = loadData();
             records.push(newRecord);
             localStorage.setItem(LS_KEY, JSON.stringify(records));
             state.records = records;
+            // 同步到 Google Sheet
+            syncToSheet({ action: "create", record: newRecord });
             renderList();
         }
 
@@ -482,6 +497,9 @@
             state.userVotes[voteKey] = candidateId;
             localStorage.setItem(LS_VOTES_KEY, JSON.stringify(state.userVotes));
             
+            // Sync to Sheet
+            syncToSheet({ action: "update", id: candidate.id, changes: { votes: candidate.votes } });
+            
             renderList();
         }
 
@@ -491,6 +509,8 @@
             if (candidate) {
                 candidate.isRecommended = !candidate.isRecommended;
                 localStorage.setItem(LS_KEY, JSON.stringify(records));
+                // Sync to Sheet
+                syncToSheet({ action: "update", id: candidate.id, changes: { isRecommended: candidate.isRecommended } });
                 renderList();
             }
         }
@@ -501,6 +521,8 @@
             if (candidate) {
                 candidate.status = (candidate.status === 'done') ? 'active' : 'done';
                 localStorage.setItem(LS_KEY, JSON.stringify(records));
+                // Sync to Sheet
+                syncToSheet({ action: "update", id: candidate.id, changes: { status: candidate.status } });
                 renderList();
             }
         }
